@@ -1,0 +1,23 @@
+name = "certifier-api"
+main = "src/index.ts"
+compatibility_date = "2024-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "certifier_db"
+database_id = "your-d1-database-id-here"
+migrations_dir = "../../db/migrations"
+
+# R2 Certificate Storage binding
+[[r2_buckets]]
+binding = "CERTIFICATES_BUCKET"
+bucket_name = "certifier-certificates"
+
+[vars]
+ENVIRONMENT = "production"
+PUBLIC_BASE_URL = "https://certifier.pages.dev"
+
+# Secrets required (configured via `wrangler secret put`):
+# JWT_SECRET

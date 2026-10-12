@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-build:
+    name: Test and Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: TypeScript Lint & Typecheck
+        run: npm run lint
+
+      - name: Run Unit & Integration Test Suite
+        run: npm run test
+
+      - name: Build Frontend Application
+        run: npm run build --workspace=apps/web
+
+      - name: Check for Committed Secrets
+        run: |
+          if grep -rn "PRIVATE KEY" --exclude-dir=node_modules --exclude-dir=.git --exclude="seed.sql" --exclude="generate-seed.mjs" .; then
+            echo "Potential secret found in codebase"
+            exit 1
+          fi
