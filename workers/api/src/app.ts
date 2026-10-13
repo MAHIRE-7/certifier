@@ -792,26 +792,62 @@ export function createApiApp() {
     const db = c.env.DB;
 
     const cred = await db
-      .prepare('SELECT id, recipient_name, pdf_object_key, status FROM credentials WHERE id = ?')
+      .prepare(`
+        SELECT c.*, e.title as event_title, o.name as org_name
+        FROM credentials c
+        LEFT JOIN events e ON c.event_id = e.id
+        LEFT JOIN organizations o ON c.organization_id = o.id
+        WHERE c.id = ?
+      `)
       .bind(credId)
-      .first<{ id: string; recipient_name: string; pdf_object_key: string; status: string }>();
+      .first<any>();
 
-    if (!cred || !cred.pdf_object_key) {
-      return c.json({ error: 'Certificate file not found' }, 404);
+    if (!cred) {
+      return c.json({ error: 'Certificate not found' }, 404);
     }
 
     let pdfData: Uint8Array | null = null;
-    if (c.env.CERTIFICATES_BUCKET) {
+    if (c.env.CERTIFICATES_BUCKET && cred.pdf_object_key) {
       const obj = await c.env.CERTIFICATES_BUCKET.get(cred.pdf_object_key);
       if (obj) {
         pdfData = new Uint8Array(await obj.arrayBuffer());
       }
-    } else {
+    } else if (cred.pdf_object_key) {
       pdfData = localPdfStorage.get(cred.pdf_object_key) || null;
     }
 
+    // Dynamic regeneration fallback if storage does not have it
     if (!pdfData) {
-      return c.json({ error: 'PDF file is not present in storage' }, 404);
+      const baseUrl = c.env.PUBLIC_BASE_URL || 'https://certifier-web.pages.dev';
+      try {
+        pdfData = await generateCertificatePdf({
+          recipientName: cred.recipient_name,
+          credentialTitle: cred.title,
+          eventOrAchievement: cred.event_title || cred.title,
+          issuerOrganization: cred.org_name || 'Authorized Issuer',
+          issuedAt: cred.issued_at,
+          credentialId: cred.id,
+          verificationUrl: `${baseUrl}/verify/${cred.id}`,
+          signerName: 'Academic & Certification Board',
+          signerTitle: 'Lead Certification Authority',
+          templateType: 'modern_tech'
+        });
+
+        const pdfObjectKey = cred.pdf_object_key || `certificates/${cred.id}.pdf`;
+        if (c.env.CERTIFICATES_BUCKET) {
+          await c.env.CERTIFICATES_BUCKET.put(pdfObjectKey, pdfData, {
+            httpMetadata: { contentType: 'application/pdf' }
+          });
+        } else {
+          localPdfStorage.set(pdfObjectKey, pdfData);
+        }
+      } catch (err: any) {
+        console.error('Dynamic PDF generation failed:', err);
+      }
+    }
+
+    if (!pdfData) {
+      return c.json({ error: 'PDF file could not be generated or found' }, 404);
     }
 
     const safeFilename = `Certificate-${cred.id}.pdf`;
