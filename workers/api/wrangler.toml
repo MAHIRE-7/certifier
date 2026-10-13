@@ -7,13 +7,13 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "certifier_db"
-database_id = "your-d1-database-id-here"
+database_id = "98161ee6-2fb5-4c41-9148-ab1cb8ec2d62"
 migrations_dir = "../../db/migrations"
 
-# R2 Certificate Storage binding
-[[r2_buckets]]
-binding = "CERTIFICATES_BUCKET"
-bucket_name = "certifier-certificates"
+# # R2 Certificate Storage binding (uncomment when R2 is enabled on your Cloudflare account)
+# [[r2_buckets]]
+# binding = "CERTIFICATES_BUCKET"
+# bucket_name = "certifier-certificates"
 
 [vars]
 ENVIRONMENT = "production"
