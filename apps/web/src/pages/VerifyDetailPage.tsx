@@ -15,7 +15,7 @@ import {
   ArrowLeft,
   FileText
 } from 'lucide-react';
-import { api } from '../api/client';
+import { api, API_BASE } from '../api/client';
 import { StatusBadge } from '../components/StatusBadge';
 
 export const VerifyDetailPage: React.FC = () => {
@@ -182,7 +182,7 @@ export const VerifyDetailPage: React.FC = () => {
               {/* Download Action */}
               {credential.download_available && status !== 'revoked' && (
                 <a
-                  href={`/api/v1/credentials/${credential.id}/download`}
+                  href={`${API_BASE}/credentials/${credential.id}/download`}
                   download
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
                 >

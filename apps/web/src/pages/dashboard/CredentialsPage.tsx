@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Award, Download, ExternalLink, ShieldAlert, Copy, Check, Filter } from 'lucide-react';
-import { api } from '../../api/client';
+import { api, API_BASE } from '../../api/client';
 import { StatusBadge } from '../../components/StatusBadge';
 
 export const CredentialsPage: React.FC = () => {
@@ -128,7 +128,7 @@ export const CredentialsPage: React.FC = () => {
 
                       {c.credential_type === 'certificate' && c.status !== 'revoked' && (
                         <a
-                          href={`/api/v1/credentials/${c.id}/download`}
+                          href={`${API_BASE}/credentials/${c.id}/download`}
                           download
                           className="text-slate-600 hover:text-slate-900 font-medium inline-flex items-center gap-1"
                         >

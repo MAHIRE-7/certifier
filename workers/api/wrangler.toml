@@ -17,7 +17,7 @@ migrations_dir = "../../db/migrations"
 
 [vars]
 ENVIRONMENT = "production"
-PUBLIC_BASE_URL = "https://certifier.pages.dev"
+PUBLIC_BASE_URL = "https://certifier-web.pages.dev"
 
 # Secrets required (configured via `wrangler secret put`):
 # JWT_SECRET

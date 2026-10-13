@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   RefreshCw
 } from 'lucide-react';
-import { api } from '../../api/client';
+import { api, API_BASE } from '../../api/client';
 import { StatusBadge } from '../../components/StatusBadge';
 
 export const EventDetailPage: React.FC = () => {
@@ -378,7 +378,7 @@ Liam O'Connor,liam.oconnor@example.test,Certified Cloud Engineer,2026-06-03`;
                     <td className="px-5 py-3 text-slate-500">{c.issued_at.split('T')[0]}</td>
                     <td className="px-5 py-3 text-right space-x-2">
                       <a
-                        href={`/api/v1/credentials/${c.id}/download`}
+                        href={`${API_BASE}/credentials/${c.id}/download`}
                         download
                         className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900 font-medium"
                       >

@@ -13,7 +13,7 @@ import {
   AlertTriangle,
   CheckCircle2
 } from 'lucide-react';
-import { api } from '../../api/client';
+import { api, API_BASE } from '../../api/client';
 import { StatusBadge } from '../../components/StatusBadge';
 
 export const CredentialDetailPage: React.FC = () => {
@@ -98,7 +98,7 @@ export const CredentialDetailPage: React.FC = () => {
           <div className="flex items-center gap-2">
             {credential.credential_type === 'certificate' && credential.status !== 'revoked' && (
               <a
-                href={`/api/v1/credentials/${credential.id}/download`}
+                href={`${API_BASE}/credentials/${credential.id}/download`}
                 download
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
               >

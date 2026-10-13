@@ -2,7 +2,8 @@
  * Typed API Client for Certifier Backend
  */
 
-const API_BASE = '/api/v1';
+export const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 
+  ((import.meta as any).env?.PROD ? 'https://certifier-api.pingsnestcertifier.workers.dev/api/v1' : '/api/v1');
 
 export interface UserSession {
   id: string;
