@@ -32,16 +32,42 @@ export async function generateCertificatePdf(data: CertificateData): Promise<Uin
   const fontTimesRoman = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const fontTimesRomanBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
 
-  // Generate QR Code PNG
-  const qrPngDataUrl = await QRCode.toDataURL(data.verificationUrl, {
-    margin: 1,
-    width: 280,
-    errorCorrectionLevel: 'M'
-  });
-  // Strip data URL header to get raw base64
-  const qrBase64 = qrPngDataUrl.replace(/^data:image\/png;base64,/, '');
-  const qrImageBytes = Uint8Array.from(atob(qrBase64), (c) => c.charCodeAt(0));
-  const qrImage = await pdfDoc.embedPng(qrImageBytes);
+  // Vector QR Code helper that does NOT require DOM canvas
+  function drawQrCodeVector(
+    targetPage: typeof page,
+    text: string,
+    x: number,
+    y: number,
+    size: number
+  ) {
+    const qr = QRCode.create(text, { errorCorrectionLevel: 'M' });
+    const moduleCount = qr.modules.size;
+    const cellSize = size / moduleCount;
+
+    // Draw white background
+    targetPage.drawRectangle({
+      x,
+      y,
+      width: size,
+      height: size,
+      color: rgb(1, 1, 1)
+    });
+
+    // Draw black square modules
+    for (let row = 0; row < moduleCount; row++) {
+      for (let col = 0; col < moduleCount; col++) {
+        if (qr.modules.get(row, col)) {
+          targetPage.drawRectangle({
+            x: x + col * cellSize,
+            y: y + (moduleCount - 1 - row) * cellSize,
+            width: cellSize + 0.1,
+            height: cellSize + 0.1,
+            color: rgb(0, 0, 0)
+          });
+        }
+      }
+    }
+  }
 
   if (template === 'modern_tech') {
     // --- Modern Tech Template ---
@@ -219,12 +245,7 @@ export async function generateCertificatePdf(data: CertificateData): Promise<Uin
     const qrDim = 90;
     const qrX = width - 75 - qrDim;
     const qrY = 65;
-    page.drawImage(qrImage, {
-      x: qrX,
-      y: qrY,
-      width: qrDim,
-      height: qrDim
-    });
+    drawQrCodeVector(page, data.verificationUrl, qrX, qrY, qrDim);
 
     // Verification URL caption below QR
     const verifyNote = 'Scan to verify credential';
@@ -356,12 +377,7 @@ export async function generateCertificatePdf(data: CertificateData): Promise<Uin
     const qrDim = 85;
     const qrX = width - 80 - qrDim;
     const qrY = 65;
-    page.drawImage(qrImage, {
-      x: qrX,
-      y: qrY,
-      width: qrDim,
-      height: qrDim
-    });
+    drawQrCodeVector(page, data.verificationUrl, qrX, qrY, qrDim);
     page.drawText('Scan to verify', {
       x: qrX + 16,
       y: qrY - 12,

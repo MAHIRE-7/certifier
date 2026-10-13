@@ -63,6 +63,12 @@ export function createApiApp() {
     await next();
   });
 
+  // Global Error Handler
+  app.onError((err, c) => {
+    console.error('API Error:', err);
+    return c.json({ error: err.message || 'Internal Server Error' }, 500);
+  });
+
   // Health check
   app.get('/health', (c) => c.json({ status: 'ok', service: 'certifier-api', timestamp: new Date().toISOString() }));
 
